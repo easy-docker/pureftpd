@@ -13,7 +13,6 @@ RUN apt update && apt install -y openssl wget libmysqlclient-dev \
 
 ADD start.sh /start.sh
 ADD pureftpd-mysql.conf /etc/pureftpd-mysql.conf
-ADD mysql.sql /mysql.sql
 ADD pure-ftpd.pem /etc/ssl/private/pure-ftpd.pem
 
 RUN chmod 600 /etc/ssl/private/pure-ftpd.pem \
