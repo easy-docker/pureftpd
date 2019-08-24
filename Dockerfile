@@ -1,24 +1,15 @@
-FROM ubuntu as builder
-WORKDIR /
-RUN apt update \
-    && apt install -y dpkg-dev libpam-dev libcap2-dev libldap2-dev default-libmysqlclient-dev libpq-dev libssl-dev openssl po-debconf debhelper wget checkinstall
-RUN wget https://download.pureftpd.org/pub/pure-ftpd/releases/pure-ftpd-1.0.49.tar.bz2 \
-    && tar xvjpf pure-ftpd-1*.tar.bz2 \
-    && cd pure-ftpd-1.0.49 \
-    && ./configure --help \
-    && ./configure --with-mysql --with-virtualchroot --with-tls --with-everything --without-capabilities \
-    && make \
-    && checkinstall -D -y
-
 FROM ubuntu
 
 LABEL maintainer="Ghostry <ghostry.green@gmail.com>"
 
-COPY --from=builder /pure-ftpd-1.0.49/pure-ftpd_1.0.49-1_amd64.deb /pure-ftpd_1.0.49-1_amd64.deb
-
-RUN apt update && apt install -y openssl  libmysqlclient-dev \
-    && dpkg -i /pure-ftpd_1.0.49-1_amd64.deb \
-    && rm -f /pure-ftpd_1.0.49-1_amd64.deb
+RUN apt update && apt install -y openssl wget libmysqlclient-dev \
+    && wget https://github.com/ghostry/docker-pureftpd/raw/master/pure-ftpd_1.0.49-1_amd64.deb \
+    && dpkg -i ./pure-ftpd_1.0.49-1_amd64.deb \
+    && rm -f ./pure-ftpd_1.0.49-1_amd64.deb \
+    && apt-get autoremove -y wget \
+    && dpkg -l|grep ^rc|awk '{print $2}'|xargs dpkg -P \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/cache/apt/*
 
 ADD start.sh /start.sh
 ADD pureftpd-mysql.conf /etc/pureftpd-mysql.conf
