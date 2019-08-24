@@ -21,7 +21,7 @@ RUN chmod 600 /etc/ssl/private/pure-ftpd.pem \
     && mkdir /dirs -p \
     && chown ftpuser:ftpuser /dirs/ -R
 
-WORKDIR /
+WORKDIR /dirs
 
 VOLUME ["/dirs/"]
 
