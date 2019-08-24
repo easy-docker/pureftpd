@@ -1,18 +1,17 @@
-FROM centos as builder
+FROM alpine as builder
 WORKDIR /
-RUN yum -y groupinstall 'Development Tools' \
-    && yum -y install mariadb-devel wget
+RUN apk add build-base mariadb-dev libcrypto1.1 libssl1.1 musl
 RUN wget https://download.pureftpd.org/pub/pure-ftpd/releases/pure-ftpd-1.0.49.tar.bz2 \
     && tar xvjpf pure-ftpd-1*.tar.bz2 \
     && cd pure-ftpd-1* \
     && ./configure --help \
-    && ./configure --prefix=/usr --bindir=/usr/bin --sbindir=/usr/sbin --libexecdir=/usr/libexec --datadir=/usr/share --sysconfdir=/etc --sharedstatedir=/usr/com --localstatedir=/var --libdir=/usr/lib64 --includedir=/usr/include --infodir=/usr/share/info --mandir=/usr/share/man --with-mysql --with-virtualchroot --with-tls --with-everything \
+    && ./configure --with-mysql --with-virtualchroot --with-tls --with-everything \
     && make
 
 FROM alpine
 
 LABEL maintainer="Ghostry <ghostry.green@gmail.com>"
-RUN mkdir /usr/pureftpd
+
 COPY --from=builder /pure-ftpd-1.0.49/src/pure-ftpd /usr/pureftpd/pure-ftpd
 COPY --from=builder /pure-ftpd-1.0.49/src/ptracetest /usr/pureftpd/ptracetest
 COPY --from=builder /pure-ftpd-1.0.49/src/pure-authd /usr/pureftpd/pure-authd
