@@ -1,39 +1,33 @@
-FROM alpine as builder
+FROM ubuntu as builder
 WORKDIR /
-RUN apk add build-base mariadb-dev libcrypto1.1 libssl1.1 musl
+RUN apt update \
+    && apt install -y dpkg-dev libpam-dev libcap2-dev libldap2-dev default-libmysqlclient-dev libpq-dev libssl-dev openssl po-debconf debhelper wget checkinstall
 RUN wget https://download.pureftpd.org/pub/pure-ftpd/releases/pure-ftpd-1.0.49.tar.bz2 \
     && tar xvjpf pure-ftpd-1*.tar.bz2 \
-    && cd pure-ftpd-1* \
+    && cd pure-ftpd-1.0.49 \
     && ./configure --help \
-    && ./configure --with-mysql --with-virtualchroot --with-tls --with-everything \
-    && make
+    && ./configure --with-mysql --with-virtualchroot --with-tls --with-everything --without-capabilities \
+    && make \
+    && checkinstall -D -y
 
-FROM alpine
+FROM ubuntu
 
 LABEL maintainer="Ghostry <ghostry.green@gmail.com>"
 
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-ftpd /usr/pureftpd/pure-ftpd
-COPY --from=builder /pure-ftpd-1.0.49/src/ptracetest /usr/pureftpd/ptracetest
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-authd /usr/pureftpd/pure-authd
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-certd /usr/pureftpd/pure-certd
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-ftpwho /usr/pureftpd/pure-ftpwho
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-mrtginfo /usr/pureftpd/pure-mrtginfo
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-pw /usr/pureftpd/pure-pw
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-pwconvert /usr/pureftpd/pure-pwconvert
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-quotacheck /usr/pureftpd/pure-quotacheck
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-statsdecode /usr/pureftpd/pure-statsdecode
-COPY --from=builder /pure-ftpd-1.0.49/src/pure-uploadscript /usr/pureftpd/pure-uploadscript
+COPY --from=builder /pure-ftpd-1.0.49/pure-ftpd_1.0.49-1_amd64.deb /pure-ftpd_1.0.49-1_amd64.deb
+
+RUN apt update && apt install -y openssl  libmysqlclient-dev \
+    && dpkg -i /pure-ftpd_1.0.49-1_amd64.deb \
+    && rm -f /pure-ftpd_1.0.49-1_amd64.deb
 
 ADD start.sh /start.sh
-ADD pure-ftpd /etc/conf.d/pure-ftpd
 ADD pureftpd-mysql.conf /etc/pureftpd-mysql.conf
 ADD mysql.sql /mysql.sql
 ADD pure-ftpd.pem /etc/ssl/private/pure-ftpd.pem
 
-RUN chmod +x /start.sh \
-    && chmod -R 755 /usr/pureftpd \
-    && chmod 600 /etc/ssl/private/pure-ftpd.pem \
-    && adduser -s /sbin/nologin -D ftpuser \
+RUN chmod 600 /etc/ssl/private/pure-ftpd.pem \
+    && chmod +x /start.sh \
+    && adduser --shell /sbin/nologin --disabled-password ftpuser \
     && mkdir /dirs -p \
     && chown ftpuser:ftpuser /dirs/ -R
 
