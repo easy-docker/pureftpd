@@ -22,4 +22,7 @@ if [ "$al" == "1" ]; then
     sed -i "s/{{MYSQLPassword}}/$MYSQLPassword/" /etc/pureftpd-mysql.conf
     sed -i "s/{{MYSQLDatabase}}/$MYSQLDatabase/" /etc/pureftpd-mysql.conf
 fi
-pure-ftpd
+while [[ true ]]; do
+    sleep 3600
+done
+/usr/pureftpd/pure-ftpd -S 21 -l mysql:/etc/pureftpd-mysql.conf -f /var/log/pureftpd.log -A -x -j -R -Z
