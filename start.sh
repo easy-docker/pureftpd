@@ -27,4 +27,5 @@ fi
     -C 10 \
     -k 90 \
     -p 30000:31000 \
+    -Y 1 -2 /etc/ssl/private/pure-ftpd.pem \
     -E -A -j -R -Z -H -w -D

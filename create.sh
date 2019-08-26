@@ -14,11 +14,12 @@ exit;
 # docker run --rm -it --name=pureftpd pureftpd
 docker exec -it pureftpd bash
 #
-/usr/local/sbin/pure-ftpd -S 23 \
+pure-ftpd -S 23 \
     -l mysql:/etc/pureftpd-mysql.conf \
     -C 10 \
     -k 90 \
     -p 30000:31000 \
+    -Y 1 -2 /etc/ssl/private/pure-ftpd.pem \
     -E -A -j -R -Z -H -w -D
 pure-ftpd v1.0.49 [privsep]
 
