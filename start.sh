@@ -24,7 +24,7 @@ if [ "$al" == "1" ]; then
 fi
 /usr/local/sbin/pure-ftpd -S 21 \
     -l mysql:/etc/pureftpd-mysql.conf \
-    -C 10 \
+    -C 20 \
     -k 90 \
     -p 30000:31000 \
     -Y 1 -2 /etc/ssl/private/pure-ftpd.pem \
