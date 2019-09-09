@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 if [ -z $MYSQLServer ]; then
     MYSQLServer='172.17.0.1'
 fi
@@ -22,7 +22,7 @@ if [ "$al" == "1" ]; then
     sed -i "s/{{MYSQLPassword}}/$MYSQLPassword/" /etc/pureftpd-mysql.conf
     sed -i "s/{{MYSQLDatabase}}/$MYSQLDatabase/" /etc/pureftpd-mysql.conf
 fi
-/usr/local/sbin/pure-ftpd -S 21 \
+/usr/pureftpd/pure-ftpd -S 21 \
     -l mysql:/etc/pureftpd-mysql.conf \
     -C 20 \
     -k 90 \
